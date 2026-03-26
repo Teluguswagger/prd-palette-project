@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams, Link } from "react-router-dom";
 import { ArrowLeft, Play, Star, Calendar, Clock } from "lucide-react";
-import { getMovieDetails, getShowDetails, getPosterUrl, getBackdropUrl, GENRE_MAP } from "@/lib/tmdb";
+import { getMovieDetails, getShowDetails, getWatchProviders, getPosterUrl, getBackdropUrl, GENRE_MAP, TMDB_IMAGE_BASE } from "@/lib/tmdb";
 import { getAnimeDetails, getMangaDetails } from "@/lib/jikan";
 import { ContentCard } from "@/components/ContentCard";
 import { ScoreBadge } from "@/components/RatingBadge";
@@ -11,12 +11,14 @@ export default function TitleDetail() {
   const [searchParams] = useSearchParams();
   const type = searchParams.get("type") || "movie";
   const [data, setData] = useState<any>(null);
+  const [providers, setProviders] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     if (!id) return;
     setLoading(true);
+    const isAnimeType = type === "anime" || type === "manga";
     const fetcher =
       type === "show" ? getShowDetails(id) :
       type === "anime" ? getAnimeDetails(id) :
@@ -24,6 +26,12 @@ export default function TitleDetail() {
       getMovieDetails(id);
 
     fetcher.then(setData).catch(console.error).finally(() => setLoading(false));
+
+    // Fetch watch providers for movies/shows
+    if (!isAnimeType) {
+      const tmdbType = type === "show" ? "tv" : "movie";
+      getWatchProviders(id, tmdbType as 'movie' | 'tv').then(setProviders).catch(() => {});
+    }
   }, [id, type]);
 
   if (loading) {
