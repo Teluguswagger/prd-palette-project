@@ -67,6 +67,39 @@ export async function getPopularShows() {
   return data.results || [];
 }
 
+// Indian content (Bollywood & Indian shows) - region IN
+export async function getIndianMovies() {
+  const data = await tmdbFetch('/discover/movie?with_original_language=hi&sort_by=popularity.desc&region=IN');
+  return data.results || [];
+}
+
+export async function getIndianShows() {
+  const data = await tmdbFetch('/discover/tv?with_original_language=hi&sort_by=popularity.desc&region=IN');
+  return data.results || [];
+}
+
+// Streaming network / Watch Providers
+export const STREAMING_NETWORKS = [
+  { id: 8, name: 'Netflix', logo: '/placeholder.svg', color: 'hsl(0 72% 51%)' },
+  { id: 337, name: 'Disney+', logo: '/placeholder.svg', color: 'hsl(220 80% 50%)' },
+  { id: 119, name: 'Amazon Prime', logo: '/placeholder.svg', color: 'hsl(195 100% 40%)' },
+  { id: 350, name: 'Apple TV+', logo: '/placeholder.svg', color: 'hsl(0 0% 20%)' },
+  { id: 531, name: 'Paramount+', logo: '/placeholder.svg', color: 'hsl(220 60% 50%)' },
+  { id: 283, name: 'Crunchyroll', logo: '/placeholder.svg', color: 'hsl(25 100% 50%)' },
+  { id: 15, name: 'Hulu', logo: '/placeholder.svg', color: 'hsl(150 70% 45%)' },
+  { id: 1899, name: 'Max', logo: '/placeholder.svg', color: 'hsl(260 60% 50%)' },
+];
+
+export async function getWatchProviderLogos() {
+  const data = await tmdbFetch('/watch/providers/movie?watch_region=IN');
+  return data.results || [];
+}
+
+export async function getMoviesByProvider(providerId: number) {
+  const data = await tmdbFetch(`/discover/movie?with_watch_providers=${providerId}&watch_region=IN&sort_by=popularity.desc`);
+  return data.results || [];
+}
+
 export function getPosterUrl(path: string | null, size = 'w500') {
   if (!path) return null;
   return `${TMDB_IMAGE_BASE}/${size}${path}`;
