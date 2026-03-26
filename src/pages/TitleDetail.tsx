@@ -122,6 +122,54 @@ export default function TitleDetail() {
 
         {activeTab === "overview" && (
           <div className="space-y-8">
+            {/* Watch Providers */}
+            {providers && (providers.flatrate || providers.buy || providers.rent) && (
+              <div>
+                <h2 className="text-lg font-bold text-foreground mb-3">📺 Where to Watch</h2>
+                <div className="space-y-4 max-w-3xl">
+                  {providers.flatrate && providers.flatrate.length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Stream</p>
+                      <div className="flex flex-wrap gap-3">
+                        {providers.flatrate.map((p: any) => (
+                          <div key={p.provider_id} className="flex items-center gap-2 bg-secondary rounded-lg px-3 py-2">
+                            <img src={`${TMDB_IMAGE_BASE}/w45${p.logo_path}`} alt={p.provider_name} className="w-6 h-6 rounded" />
+                            <span className="text-xs font-medium text-foreground">{p.provider_name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {providers.rent && providers.rent.length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Rent</p>
+                      <div className="flex flex-wrap gap-3">
+                        {providers.rent.map((p: any) => (
+                          <div key={p.provider_id} className="flex items-center gap-2 bg-secondary rounded-lg px-3 py-2">
+                            <img src={`${TMDB_IMAGE_BASE}/w45${p.logo_path}`} alt={p.provider_name} className="w-6 h-6 rounded" />
+                            <span className="text-xs font-medium text-foreground">{p.provider_name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {providers.buy && providers.buy.length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Buy</p>
+                      <div className="flex flex-wrap gap-3">
+                        {providers.buy.map((p: any) => (
+                          <div key={p.provider_id} className="flex items-center gap-2 bg-secondary rounded-lg px-3 py-2">
+                            <img src={`${TMDB_IMAGE_BASE}/w45${p.logo_path}`} alt={p.provider_name} className="w-6 h-6 rounded" />
+                            <span className="text-xs font-medium text-foreground">{p.provider_name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {overview && (
               <div>
                 <h2 className="text-lg font-bold text-foreground mb-3">Synopsis</h2>
