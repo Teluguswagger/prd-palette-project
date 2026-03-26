@@ -90,14 +90,11 @@ export const STREAMING_NETWORKS = [
   { id: 1899, name: 'Max', logo: '/placeholder.svg', color: 'hsl(260 60% 50%)' },
 ];
 
-export async function getWatchProviderLogos() {
-  const data = await tmdbFetch('/watch/providers/movie?watch_region=IN');
-  return data.results || [];
-}
-
-export async function getMoviesByProvider(providerId: number) {
-  const data = await tmdbFetch(`/discover/movie?with_watch_providers=${providerId}&watch_region=IN&sort_by=popularity.desc`);
-  return data.results || [];
+export async function getWatchProviders(id: string, type: 'movie' | 'tv') {
+  const data = await tmdbFetch(`/${type}/${id}/watch/providers`);
+  // Return IN or US providers
+  const results = data.results || {};
+  return results.IN || results.US || null;
 }
 
 export function getPosterUrl(path: string | null, size = 'w500') {

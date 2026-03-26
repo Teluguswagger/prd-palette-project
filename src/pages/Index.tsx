@@ -2,10 +2,8 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { TrendingUp, Star, Flame, ChevronRight } from "lucide-react";
 import { ContentCard, ContentCardSkeleton } from "@/components/ContentCard";
-import { StreamingNetworks } from "@/components/StreamingNetworks";
 import {
   getTrendingMovies, getTrendingShows, getUpcomingMovies, getNowPlayingMovies,
-  getIndianMovies, getIndianShows,
   getPosterUrl, getBackdropUrl, GENRE_MAP,
 } from "@/lib/tmdb";
 import { getTopAnime } from "@/lib/jikan";
@@ -61,7 +59,7 @@ function TrendingStrip({ title, items, loading, type }: { title: string; items: 
       <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
         {loading
           ? Array.from({ length: 8 }).map((_, i) => <div key={i} className="min-w-[140px]"><ContentCardSkeleton /></div>)
-          : items.slice(0, 10).map((item: any) => (
+          : items.slice(0, 12).map((item: any) => (
               <div key={item.id} className="min-w-[140px] max-w-[140px]">
                 <ContentCard
                   id={item.id}
@@ -120,8 +118,6 @@ export default function HomePage() {
   const [trendingShows, setTrendingShows] = useState<any[]>([]);
   const [upcoming, setUpcoming] = useState<any[]>([]);
   const [nowPlaying, setNowPlaying] = useState<any[]>([]);
-  const [indianMovies, setIndianMovies] = useState<any[]>([]);
-  const [indianShows, setIndianShows] = useState<any[]>([]);
   const [topAnime, setTopAnime] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<'streaming' | 'upcoming'>('streaming');
@@ -132,16 +128,12 @@ export default function HomePage() {
       getTrendingShows(),
       getUpcomingMovies(),
       getNowPlayingMovies(),
-      getIndianMovies().catch(() => []),
-      getIndianShows().catch(() => []),
       getTopAnime().catch(() => []),
-    ]).then(([movies, shows, up, np, inMovies, inShows, anime]) => {
+    ]).then(([movies, shows, up, np, anime]) => {
       setTrendingMovies(movies);
       setTrendingShows(shows);
       setUpcoming(up);
       setNowPlaying(np);
-      setIndianMovies(inMovies);
-      setIndianShows(inShows);
       setTopAnime(anime);
       setLoading(false);
     }).catch(() => setLoading(false));
@@ -182,30 +174,6 @@ export default function HomePage() {
               </div>
             </section>
 
-            {/* Indian Movies (Bollywood) */}
-            {indianMovies.length > 0 && (
-              <section>
-                <SectionHeader title="🇮🇳 Indian Movies" />
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {indianMovies.slice(0, 6).map((item: any) => (
-                    <ContentCard key={item.id} id={item.id} title={item.title || item.name} posterUrl={getPosterUrl(item.poster_path)} type="Bollywood" genre={GENRE_MAP[item.genre_ids?.[0]] || ''} year={(item.release_date || '').slice(0, 4)} score={item.vote_average} href={`/title/${item.id}?type=movie`} />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Indian Shows */}
-            {indianShows.length > 0 && (
-              <section>
-                <SectionHeader title="🇮🇳 Indian Shows" />
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {indianShows.slice(0, 6).map((item: any) => (
-                    <ContentCard key={item.id} id={item.id} title={item.name || item.title} posterUrl={getPosterUrl(item.poster_path)} type="Indian TV" genre={GENRE_MAP[item.genre_ids?.[0]] || ''} year={(item.first_air_date || '').slice(0, 4)} score={item.vote_average} href={`/title/${item.id}?type=show`} />
-                  ))}
-                </div>
-              </section>
-            )}
-
             {/* Top Anime */}
             {topAnime.length > 0 && (
               <section>
@@ -221,7 +189,6 @@ export default function HomePage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            <StreamingNetworks />
             <SidebarTop10 title="Top 10 This Week" items={trendingMovies} icon={<TrendingUp className="w-4 h-4 text-primary" />} />
             <SidebarTop10 title="Most Anticipated" items={upcoming} icon={<Star className="w-4 h-4 text-yellow-500" />} />
           </div>
