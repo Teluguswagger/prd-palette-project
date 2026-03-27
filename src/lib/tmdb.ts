@@ -1,5 +1,5 @@
-const TMDB_BASE = 'https://api.themoviedb.org/3';
-const API_KEY = '2dca580c2a14b55200e784d157207b4d';
+import { supabase } from "@/integrations/supabase/client";
+
 export const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p';
 
 export const GENRE_MAP: Record<number, string> = {
@@ -14,9 +14,11 @@ export const GENRE_MAP: Record<number, string> = {
 };
 
 async function tmdbFetch(endpoint: string) {
-  const res = await fetch(`${TMDB_BASE}${endpoint}${endpoint.includes('?') ? '&' : '?'}api_key=${API_KEY}`);
-  if (!res.ok) throw new Error(`TMDB error: ${res.status}`);
-  return res.json();
+  const { data, error } = await supabase.functions.invoke('tmdb-proxy', {
+    body: { endpoint },
+  });
+  if (error) throw new Error(`TMDB proxy error: ${error.message}`);
+  return data;
 }
 
 export async function getTrendingMovies() {
@@ -67,7 +69,6 @@ export async function getPopularShows() {
   return data.results || [];
 }
 
-// Indian content (Bollywood & Indian shows) - region IN
 export async function getIndianMovies() {
   const data = await tmdbFetch('/discover/movie?with_original_language=hi&sort_by=popularity.desc&region=IN');
   return data.results || [];
@@ -78,7 +79,6 @@ export async function getIndianShows() {
   return data.results || [];
 }
 
-// Indian OTT trending - movies & shows popular on Indian streaming platforms
 export async function getIndianOTTMovies() {
   const data = await tmdbFetch('/discover/movie?with_original_language=hi|ta|te|ml|kn&sort_by=popularity.desc&region=IN&watch_region=IN&with_watch_monetization_types=flatrate');
   return data.results || [];
@@ -89,7 +89,6 @@ export async function getIndianOTTShows() {
   return data.results || [];
 }
 
-// Streaming network / Watch Providers
 export const STREAMING_NETWORKS = [
   { id: 8, name: 'Netflix', logo: '/placeholder.svg', color: 'hsl(0 72% 51%)' },
   { id: 337, name: 'Disney+', logo: '/placeholder.svg', color: 'hsl(220 80% 50%)' },
@@ -103,7 +102,6 @@ export const STREAMING_NETWORKS = [
 
 export async function getWatchProviders(id: string, type: 'movie' | 'tv') {
   const data = await tmdbFetch(`/${type}/${id}/watch/providers`);
-  // Return IN or US providers
   const results = data.results || {};
   return results.IN || results.US || null;
 }
