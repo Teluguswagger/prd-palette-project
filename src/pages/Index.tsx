@@ -120,7 +120,8 @@ export default function HomePage() {
   const [upcoming, setUpcoming] = useState<any[]>([]);
   const [nowPlaying, setNowPlaying] = useState<any[]>([]);
   const [topAnime, setTopAnime] = useState<any[]>([]);
-  const [indianOTT, setIndianOTT] = useState<any[]>([]);
+  const [indianOTTMovies, setIndianOTTMovies] = useState<any[]>([]);
+  const [indianOTTShows, setIndianOTTShows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<'streaming' | 'upcoming'>('streaming');
   const [ottTab, setOttTab] = useState<'movies' | 'shows'>('movies');
@@ -140,15 +141,14 @@ export default function HomePage() {
       setUpcoming(up);
       setNowPlaying(np);
       setTopAnime(anime);
-      setIndianOTT(ottTab === 'movies' ? ottMovies : ottShows);
-      // Store both for tab switching
-      (window as any).__ottMovies = ottMovies;
-      (window as any).__ottShows = ottShows;
+      setIndianOTTMovies(ottMovies);
+      setIndianOTTShows(ottShows);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
 
   const displayItems = tab === 'streaming' ? nowPlaying : upcoming;
+  const ottItems = ottTab === 'movies' ? indianOTTMovies : indianOTTShows;
 
   return (
     <div>
@@ -158,6 +158,44 @@ export default function HomePage() {
       <div className="max-w-7xl mx-auto px-4 pt-8">
         <TrendingStrip title="Trending Movies" items={trendingMovies} loading={loading} type="movie" />
         <TrendingStrip title="Trending Shows" items={trendingShows} loading={loading} type="show" />
+
+        {/* Top 10 on Indian OTT */}
+        <section className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">🇮🇳</span>
+              <h2 className="text-lg font-bold text-foreground">Top 10 Movies & Shows on Indian OTT This Week</h2>
+            </div>
+          </div>
+          <div className="flex gap-2 mb-4">
+            {(['movies', 'shows'] as const).map((t) => (
+              <button key={t} onClick={() => setOttTab(t)} className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${ottTab === t ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-accent'}`}>
+                {t === 'movies' ? 'Movies' : 'Shows'}
+              </button>
+            ))}
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            {loading
+              ? Array.from({ length: 10 }).map((_, i) => <ContentCardSkeleton key={i} />)
+              : ottItems.slice(0, 10).map((item: any, i: number) => (
+                  <div key={item.id} className="relative">
+                    <span className="absolute top-2 left-2 z-10 bg-primary text-primary-foreground text-xs font-black w-6 h-6 flex items-center justify-center rounded-full">
+                      {i + 1}
+                    </span>
+                    <ContentCard
+                      id={item.id}
+                      title={item.title || item.name}
+                      posterUrl={getPosterUrl(item.poster_path)}
+                      type={ottTab === 'movies' ? 'Film' : 'TV Show'}
+                      genre={GENRE_MAP[item.genre_ids?.[0]] || ''}
+                      year={(item.release_date || item.first_air_date || '').slice(0, 4)}
+                      score={item.vote_average}
+                      href={`/title/${item.id}?type=${ottTab === 'movies' ? 'movie' : 'show'}`}
+                    />
+                  </div>
+                ))}
+          </div>
+        </section>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
