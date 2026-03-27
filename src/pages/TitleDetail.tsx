@@ -1,10 +1,146 @@
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams, Link } from "react-router-dom";
-import { ArrowLeft, Play, Star, Calendar, Clock } from "lucide-react";
+import { ArrowLeft, Play, Star, Calendar, Clock, Bookmark, BookmarkCheck, Send } from "lucide-react";
 import { getMovieDetails, getShowDetails, getWatchProviders, getPosterUrl, getBackdropUrl, GENRE_MAP, TMDB_IMAGE_BASE } from "@/lib/tmdb";
 import { getAnimeDetails, getMangaDetails } from "@/lib/jikan";
 import { ContentCard } from "@/components/ContentCard";
 import { ScoreBadge } from "@/components/RatingBadge";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+function WatchlistButton({ contentId, contentType, title, posterPath }: { contentId: string; contentType: string; title: string; posterPath: string | null }) {
+  const { user } = useAuth();
+  const [inWatchlist, setInWatchlist] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("watchlists")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("content_id", contentId)
+      .eq("content_type", contentType)
+      .maybeSingle()
+      .then(({ data }) => setInWatchlist(!!data));
+  }, [user, contentId, contentType]);
+
+  const toggle = async () => {
+    if (!user) { toast.error("Sign in to add to watchlist"); return; }
+    setLoading(true);
+    if (inWatchlist) {
+      await supabase.from("watchlists").delete().eq("user_id", user.id).eq("content_id", contentId).eq("content_type", contentType);
+      setInWatchlist(false);
+      toast.success("Removed from watchlist");
+    } else {
+      await supabase.from("watchlists").insert({ user_id: user.id, content_id: contentId, content_type: contentType, title, poster_path: posterPath });
+      setInWatchlist(true);
+      toast.success("Added to watchlist!");
+    }
+    setLoading(false);
+  };
+
+  return (
+    <button onClick={toggle} disabled={loading} className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${inWatchlist ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground border border-hub-border hover:border-hub-border-hover'}`}>
+      {inWatchlist ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
+      {inWatchlist ? "In Watchlist" : "Add to Watchlist"}
+    </button>
+  );
+}
+
+function ReviewSection({ contentId, contentType }: { contentId: string; contentType: string }) {
+  const { user } = useAuth();
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [rating, setRating] = useState(7);
+  const [reviewText, setReviewText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [myReview, setMyReview] = useState<any>(null);
+
+  useEffect(() => {
+    supabase
+      .from("reviews")
+      .select("*, profiles(display_name)")
+      .eq("content_id", contentId)
+      .eq("content_type", contentType)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        setReviews(data || []);
+        if (user) {
+          const mine = (data || []).find((r: any) => r.user_id === user.id);
+          if (mine) { setMyReview(mine); setRating(mine.rating); setReviewText(mine.review_text || ""); }
+        }
+      });
+  }, [contentId, contentType, user]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) { toast.error("Sign in to leave a review"); return; }
+    setSubmitting(true);
+
+    if (myReview) {
+      const { error } = await supabase.from("reviews").update({ rating, review_text: reviewText, updated_at: new Date().toISOString() }).eq("id", myReview.id);
+      if (error) toast.error(error.message);
+      else { toast.success("Review updated!"); setMyReview({ ...myReview, rating, review_text: reviewText }); }
+    } else {
+      const { error, data } = await supabase.from("reviews").insert({ user_id: user.id, content_id: contentId, content_type: contentType, rating, review_text: reviewText }).select().single();
+      if (error) toast.error(error.message);
+      else { toast.success("Review posted!"); setMyReview(data); setReviews([data, ...reviews]); }
+    }
+    setSubmitting(false);
+  };
+
+  return (
+    <div>
+      <h2 className="text-lg font-bold text-foreground mb-4">💬 Reviews</h2>
+
+      {user && (
+        <form onSubmit={handleSubmit} className="bg-secondary border border-hub-border rounded-xl p-4 mb-6 space-y-3">
+          <p className="text-sm font-medium text-foreground">{myReview ? "Update your review" : "Write a review"}</p>
+          <div className="flex items-center gap-3">
+            <label className="text-xs text-muted-foreground">Rating:</label>
+            <div className="flex gap-1">
+              {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                <button key={n} type="button" onClick={() => setRating(n)} className={`w-7 h-7 rounded text-xs font-bold transition-colors ${n <= rating ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}>
+                  {n}
+                </button>
+              ))}
+            </div>
+          </div>
+          <textarea
+            value={reviewText}
+            onChange={(e) => setReviewText(e.target.value)}
+            placeholder="Share your thoughts (optional)..."
+            className="w-full bg-background border border-hub-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none h-20"
+          />
+          <button type="submit" disabled={submitting} className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 disabled:opacity-50">
+            <Send className="w-3 h-3" /> {myReview ? "Update" : "Post Review"}
+          </button>
+        </form>
+      )}
+
+      {reviews.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No reviews yet. Be the first!</p>
+      ) : (
+        <div className="space-y-4">
+          {reviews.map((r) => (
+            <div key={r.id} className="bg-card border border-hub-border rounded-xl p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-foreground">{r.profiles?.display_name || "User"}</span>
+                <div className="flex items-center gap-1">
+                  <Star className="w-3 h-3 text-primary fill-primary" />
+                  <span className="text-sm font-bold text-foreground">{r.rating}/10</span>
+                </div>
+              </div>
+              {r.review_text && <p className="text-sm text-secondary-foreground">{r.review_text}</p>}
+              <p className="text-xs text-muted-foreground mt-2">{new Date(r.created_at).toLocaleDateString()}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function TitleDetail() {
   const { id } = useParams();
@@ -27,7 +163,6 @@ export default function TitleDetail() {
 
     fetcher.then(setData).catch(console.error).finally(() => setLoading(false));
 
-    // Fetch watch providers for movies/shows
     if (!isAnimeType) {
       const tmdbType = type === "show" ? "tv" : "movie";
       getWatchProviders(id, tmdbType as 'movie' | 'tv').then(setProviders).catch(() => {});
@@ -59,14 +194,13 @@ export default function TitleDetail() {
   const year = isAnime
     ? (data.year || data.aired?.from?.slice(0, 4) || data.published?.from?.slice(0, 4))
     : (data.release_date || data.first_air_date || '').slice(0, 4);
-  const genres = isAnime
-    ? (data.genres || []).map((g: any) => g.name)
-    : (data.genres || []).map((g: any) => g.name);
+  const genres = (data.genres || []).map((g: any) => g.name);
   const cast = !isAnime ? (data.credits?.cast || []).slice(0, 12) : [];
   const trailer = !isAnime ? (data.videos?.results || []).find((v: any) => v.type === "Trailer" && v.site === "YouTube") : null;
   const similar = !isAnime ? (data.similar?.results || []).slice(0, 6) : [];
   const episodes = isAnime ? data.episodes : (data.number_of_episodes || null);
   const status = data.status;
+  const posterPath = isAnime ? null : data.poster_path;
 
   return (
     <div className="pt-16 min-h-screen">
@@ -98,6 +232,9 @@ export default function TitleDetail() {
                   <span key={g} className="text-xs bg-accent text-accent-foreground px-2.5 py-1 rounded-full">{g}</span>
                 ))}
               </div>
+              <div className="flex items-center gap-3 mb-3">
+                <WatchlistButton contentId={id!} contentType={type === "show" ? "show" : type === "anime" ? "anime" : "movie"} title={title} posterPath={posterPath} />
+              </div>
               <p className="text-sm text-secondary-foreground line-clamp-3 leading-relaxed">{overview}</p>
             </div>
           </div>
@@ -107,7 +244,7 @@ export default function TitleDetail() {
       {/* Tabs */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex gap-1 mb-6 border-b border-hub-border">
-          {["overview", ...(similar.length > 0 ? ["related"] : [])].map((tab) => (
+          {["overview", "reviews", ...(similar.length > 0 ? ["related"] : [])].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -122,7 +259,6 @@ export default function TitleDetail() {
 
         {activeTab === "overview" && (
           <div className="space-y-8">
-            {/* Watch Providers */}
             {providers && (providers.flatrate || providers.buy || providers.rent) && (
               <div>
                 <h2 className="text-lg font-bold text-foreground mb-3">📺 Where to Watch</h2>
@@ -217,6 +353,10 @@ export default function TitleDetail() {
               </div>
             )}
           </div>
+        )}
+
+        {activeTab === "reviews" && (
+          <ReviewSection contentId={id!} contentType={type === "show" ? "show" : type === "anime" ? "anime" : "movie"} />
         )}
 
         {activeTab === "related" && similar.length > 0 && (
