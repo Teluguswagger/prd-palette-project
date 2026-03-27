@@ -78,6 +78,17 @@ export async function getIndianShows() {
   return data.results || [];
 }
 
+// Indian OTT trending - movies & shows popular on Indian streaming platforms
+export async function getIndianOTTMovies() {
+  const data = await tmdbFetch('/discover/movie?with_original_language=hi|ta|te|ml|kn&sort_by=popularity.desc&region=IN&watch_region=IN&with_watch_monetization_types=flatrate');
+  return data.results || [];
+}
+
+export async function getIndianOTTShows() {
+  const data = await tmdbFetch('/discover/tv?with_original_language=hi|ta|te|ml|kn&sort_by=popularity.desc&region=IN&watch_region=IN&with_watch_monetization_types=flatrate');
+  return data.results || [];
+}
+
 // Streaming network / Watch Providers
 export const STREAMING_NETWORKS = [
   { id: 8, name: 'Netflix', logo: '/placeholder.svg', color: 'hsl(0 72% 51%)' },

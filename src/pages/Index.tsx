@@ -4,6 +4,7 @@ import { TrendingUp, Star, Flame, ChevronRight } from "lucide-react";
 import { ContentCard, ContentCardSkeleton } from "@/components/ContentCard";
 import {
   getTrendingMovies, getTrendingShows, getUpcomingMovies, getNowPlayingMovies,
+  getIndianOTTMovies, getIndianOTTShows,
   getPosterUrl, getBackdropUrl, GENRE_MAP,
 } from "@/lib/tmdb";
 import { getTopAnime } from "@/lib/jikan";
@@ -119,8 +120,10 @@ export default function HomePage() {
   const [upcoming, setUpcoming] = useState<any[]>([]);
   const [nowPlaying, setNowPlaying] = useState<any[]>([]);
   const [topAnime, setTopAnime] = useState<any[]>([]);
+  const [indianOTT, setIndianOTT] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<'streaming' | 'upcoming'>('streaming');
+  const [ottTab, setOttTab] = useState<'movies' | 'shows'>('movies');
 
   useEffect(() => {
     Promise.all([
@@ -129,12 +132,18 @@ export default function HomePage() {
       getUpcomingMovies(),
       getNowPlayingMovies(),
       getTopAnime().catch(() => []),
-    ]).then(([movies, shows, up, np, anime]) => {
+      getIndianOTTMovies().catch(() => []),
+      getIndianOTTShows().catch(() => []),
+    ]).then(([movies, shows, up, np, anime, ottMovies, ottShows]) => {
       setTrendingMovies(movies);
       setTrendingShows(shows);
       setUpcoming(up);
       setNowPlaying(np);
       setTopAnime(anime);
+      setIndianOTT(ottTab === 'movies' ? ottMovies : ottShows);
+      // Store both for tab switching
+      (window as any).__ottMovies = ottMovies;
+      (window as any).__ottShows = ottShows;
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
