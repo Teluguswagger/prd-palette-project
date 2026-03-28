@@ -80,9 +80,11 @@ export async function getIndianShows() {
 }
 
 export async function getInTheatersMovies() {
+  const today = new Date().toISOString().split('T')[0];
+  const fiveWeeksAgo = new Date(Date.now() - 35 * 86400000).toISOString().split('T')[0];
   const [global, indian] = await Promise.all([
-    tmdbFetch('/movie/now_playing?region=US'),
-    tmdbFetch('/discover/movie?with_original_language=hi|ta|te|ml|kn&region=IN&with_release_type=3|2'),
+    tmdbFetch(`/discover/movie?region=US&with_release_type=3|2&release_date.gte=${fiveWeeksAgo}&release_date.lte=${today}&sort_by=popularity.desc`),
+    tmdbFetch(`/discover/movie?with_original_language=hi|ta|te|ml|kn&region=IN&with_release_type=3|2&release_date.gte=${fiveWeeksAgo}&release_date.lte=${today}&sort_by=popularity.desc`),
   ]);
   const combined = [...(global.results || [])];
   const ids = new Set(combined.map((m: any) => m.id));
@@ -93,15 +95,16 @@ export async function getInTheatersMovies() {
   return combined;
 }
 
-export async function getOnTVShows() {
-  const [global, indian] = await Promise.all([
+export async function getOnTVContent() {
+  const [globalShows, globalMovies, indianShows] = await Promise.all([
     tmdbFetch('/tv/on_the_air'),
+    tmdbFetch('/movie/now_playing'),
     tmdbFetch('/discover/tv?with_original_language=hi&sort_by=vote_average.desc&vote_count.gte=50&with_genres=18,80,10759,10765,9648&without_genres=10766,10767,10764'),
   ]);
-  const combined = [...(global.results || [])];
-  const ids = new Set(combined.map((s: any) => s.id));
-  for (const s of (indian.results || [])) {
-    if (!ids.has(s.id)) { combined.push(s); ids.add(s.id); }
+  const combined: any[] = [];
+  const ids = new Set<number>();
+  for (const item of [...(globalShows.results || []), ...(globalMovies.results || []), ...(indianShows.results || [])]) {
+    if (!ids.has(item.id)) { combined.push(item); ids.add(item.id); }
   }
   combined.sort((a: any, b: any) => (b.popularity || 0) - (a.popularity || 0));
   return combined;

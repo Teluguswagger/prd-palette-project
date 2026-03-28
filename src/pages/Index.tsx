@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { TrendingUp, Star, Flame, ChevronRight } from "lucide-react";
 import { ContentCard, ContentCardSkeleton } from "@/components/ContentCard";
 import {
-  getTrendingMovies, getTrendingShows, getInTheatersMovies, getOnTVShows,
+  getTrendingMovies, getTrendingShows, getInTheatersMovies, getOnTVContent,
   getIndianOTTMovies, getIndianOTTShows,
   getPosterUrl, getBackdropUrl, GENRE_MAP,
 } from "@/lib/tmdb";
@@ -131,7 +131,7 @@ export default function HomePage() {
       getTrendingMovies(),
       getTrendingShows(),
       getInTheatersMovies(),
-      getOnTVShows(),
+      getOnTVContent(),
       getTopAnime().catch(() => []),
       getIndianOTTMovies().catch(() => []),
       getIndianOTTShows().catch(() => []),
@@ -216,7 +216,7 @@ export default function HomePage() {
                 {loading
                   ? Array.from({ length: 6 }).map((_, i) => <ContentCardSkeleton key={i} />)
                   : displayItems.slice(0, 6).map((item: any) => (
-                      <ContentCard key={item.id} id={item.id} title={item.title || item.name} posterUrl={getPosterUrl(item.poster_path)} type={tab === 'theaters' ? 'Film' : 'TV Show'} genre={GENRE_MAP[item.genre_ids?.[0]] || ''} year={(item.release_date || item.first_air_date || '').slice(0, 4)} score={item.vote_average} href={`/title/${item.id}?type=${tab === 'theaters' ? 'movie' : 'show'}`} />
+                      <ContentCard key={item.id} id={item.id} title={item.title || item.name} posterUrl={getPosterUrl(item.poster_path)} type={item.title ? 'Film' : 'TV Show'} genre={GENRE_MAP[item.genre_ids?.[0]] || ''} year={(item.release_date || item.first_air_date || '').slice(0, 4)} score={item.vote_average} href={`/title/${item.id}?type=${item.title ? 'movie' : 'show'}`} />
                     ))}
               </div>
             </section>
