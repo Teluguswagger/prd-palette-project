@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { TrendingUp, Star, Flame, ChevronRight } from "lucide-react";
 import { ContentCard, ContentCardSkeleton } from "@/components/ContentCard";
 import {
-  getTrendingMovies, getTrendingShows, getUpcomingMovies, getNowPlayingMovies,
+  getTrendingMovies, getTrendingShows, getInTheatersMovies, getOnTVShows,
   getIndianOTTMovies, getIndianOTTShows,
   getPosterUrl, getBackdropUrl, GENRE_MAP,
 } from "@/lib/tmdb";
