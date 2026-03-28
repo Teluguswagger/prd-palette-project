@@ -120,6 +120,32 @@ export async function getIndianOTTShows() {
   return data.results || [];
 }
 
+export async function getComingSoonIndia() {
+  const today = new Date().toISOString().split('T')[0];
+  const threeMonths = new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0];
+  const [movies, shows] = await Promise.all([
+    tmdbFetch(`/discover/movie?region=IN&watch_region=IN&with_watch_monetization_types=flatrate&sort_by=popularity.desc&primary_release_date.gte=${today}&primary_release_date.lte=${threeMonths}&with_original_language=hi|ta|te|ml|kn|en`),
+    tmdbFetch(`/discover/tv?watch_region=IN&with_watch_monetization_types=flatrate&sort_by=popularity.desc&first_air_date.gte=${today}&first_air_date.lte=${threeMonths}&with_original_language=hi|ta|te|ml|kn|en`),
+  ]);
+  const combined: any[] = [];
+  const ids = new Set<number>();
+  for (const item of [...(movies.results || []), ...(shows.results || [])]) {
+    if (!ids.has(item.id)) { combined.push(item); ids.add(item.id); }
+  }
+  combined.sort((a: any, b: any) => {
+    const dateA = a.release_date || a.first_air_date || '';
+    const dateB = b.release_date || b.first_air_date || '';
+    return dateA.localeCompare(dateB);
+  });
+  return combined;
+}
+
+export async function getItemWatchProviders(id: number, type: 'movie' | 'tv') {
+  const data = await tmdbFetch(`/${type}/${id}/watch/providers`);
+  const results = data.results || {};
+  return results.IN || results.US || null;
+}
+
 export const STREAMING_NETWORKS = [
   { id: 8, name: 'Netflix', logo: '/placeholder.svg', color: 'hsl(0 72% 51%)' },
   { id: 337, name: 'Disney+', logo: '/placeholder.svg', color: 'hsl(220 80% 50%)' },

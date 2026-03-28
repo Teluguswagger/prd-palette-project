@@ -4,9 +4,10 @@ import { TrendingUp, Star, Flame, ChevronRight } from "lucide-react";
 import { ContentCard, ContentCardSkeleton } from "@/components/ContentCard";
 import {
   getTrendingMovies, getTrendingShows, getInTheatersMovies, getOnTVContent,
-  getIndianOTTMovies, getIndianOTTShows,
+  getIndianOTTMovies, getIndianOTTShows, getComingSoonIndia,
   getPosterUrl, getBackdropUrl, GENRE_MAP,
 } from "@/lib/tmdb";
+import ComingSoonSection from "@/components/ComingSoonSection";
 import { getTopAnime } from "@/lib/jikan";
 
 function HeroSection({ items }: { items: any[] }) {
@@ -122,6 +123,7 @@ export default function HomePage() {
   const [topAnime, setTopAnime] = useState<any[]>([]);
   const [indianOTTMovies, setIndianOTTMovies] = useState<any[]>([]);
   const [indianOTTShows, setIndianOTTShows] = useState<any[]>([]);
+  const [comingSoon, setComingSoon] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<'theaters' | 'ontv'>('theaters');
   const [ottTab, setOttTab] = useState<'movies' | 'shows'>('movies');
@@ -135,7 +137,8 @@ export default function HomePage() {
       getTopAnime().catch(() => []),
       getIndianOTTMovies().catch(() => []),
       getIndianOTTShows().catch(() => []),
-    ]).then(([movies, shows, theaters, tv, anime, ottMovies, ottShows]) => {
+      getComingSoonIndia().catch(() => []),
+    ]).then(([movies, shows, theaters, tv, anime, ottMovies, ottShows, upcoming]) => {
       setTrendingMovies(movies);
       setTrendingShows(shows);
       setInTheaters(theaters);
@@ -143,6 +146,7 @@ export default function HomePage() {
       setTopAnime(anime);
       setIndianOTTMovies(ottMovies);
       setIndianOTTShows(ottShows);
+      setComingSoon(upcoming);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
@@ -196,6 +200,9 @@ export default function HomePage() {
                 ))}
           </div>
         </section>
+
+        {/* Coming Soon on OTT */}
+        <ComingSoonSection items={comingSoon} loading={loading} />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
