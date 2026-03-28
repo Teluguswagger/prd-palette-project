@@ -116,8 +116,12 @@ export async function getIndianOTTMovies() {
 }
 
 export async function getIndianOTTShows() {
-  const data = await tmdbFetch('/discover/tv?with_original_language=hi|ta|te|ml|kn&sort_by=popularity.desc&region=IN&watch_region=IN&with_watch_monetization_types=flatrate');
-  return data.results || [];
+  const data = await tmdbFetch('/discover/tv?with_original_language=hi|ta|te|ml|kn&sort_by=popularity.desc&region=IN&watch_region=IN&with_watch_monetization_types=flatrate&without_genres=10766,10767,10764,10762,10763&vote_average.gte=5&with_type=2|4');
+  return (data.results || []).filter((item: any) => {
+    const dominated = (item.genre_ids || []);
+    return !dominated.includes(10766) && !dominated.includes(10767) && !dominated.includes(10764);
+  });
+}
 }
 
 export async function getComingSoonIndia() {
