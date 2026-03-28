@@ -116,7 +116,7 @@ export async function getIndianOTTMovies() {
 }
 
 export async function getIndianOTTShows() {
-  const data = await tmdbFetch('/discover/tv?with_original_language=hi|ta|te|ml|kn&sort_by=popularity.desc&region=IN&watch_region=IN&with_watch_monetization_types=flatrate');
+  const data = await tmdbFetch('/discover/tv?with_original_language=hi|ta|te|ml|kn&sort_by=popularity.desc&region=IN&watch_region=IN&with_watch_monetization_types=flatrate&with_genres=18,80,10759,10765,9648&without_genres=10766,10767,10764,10763,10762&vote_count.gte=30');
   return data.results || [];
 }
 
