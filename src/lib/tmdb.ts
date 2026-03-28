@@ -118,7 +118,7 @@ export async function getIndianOTTMovies() {
 export async function getIndianOTTShows() {
   // Fetch popular Indian OTT shows, excluding soaps/reality/talk/news/kids
   const langs = 'hi|ta|te|ml|kn|bn|mr|pa|gu';
-  const base = `sort_by=popularity.desc&region=IN&watch_region=IN&with_watch_monetization_types=flatrate&without_genres=10766,10767,10764,10762,10763&vote_average.gte=5.5&with_type=4`;
+  const base = `sort_by=popularity.desc&region=IN&watch_region=IN&with_watch_monetization_types=flatrate&without_genres=10766,10767,10764,10762,10763&vote_average.gte=6&with_type=4`;
   const [data, data2] = await Promise.all([
     tmdbFetch(`/discover/tv?with_original_language=${langs}&${base}&page=1`),
     tmdbFetch(`/discover/tv?with_original_language=${langs}&${base}&page=2`),
