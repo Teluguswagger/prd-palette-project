@@ -131,7 +131,7 @@ export default function HomePage() {
       getTrendingMovies(),
       getTrendingShows(),
       getInTheatersMovies(),
-      getOnTVShows(),
+      getOnTVContent(),
       getTopAnime().catch(() => []),
       getIndianOTTMovies().catch(() => []),
       getIndianOTTShows().catch(() => []),
