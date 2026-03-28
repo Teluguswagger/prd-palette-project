@@ -43,7 +43,7 @@ export function ContentCard({ id, title, posterUrl, type, genre, year, score, hr
         )}
       </div>
       <div className="p-3 space-y-1">
-        <h3 className="text-sm font-semibold text-foreground truncate">{title}</h3>
+        <h3 className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">{title}</h3>
         <p className="text-xs text-secondary-foreground truncate">
           {type}{genre ? ` · ${genre}` : ''}{year ? ` · ${year}` : ''}
         </p>
