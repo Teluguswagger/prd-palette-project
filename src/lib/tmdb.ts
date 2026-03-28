@@ -131,7 +131,7 @@ export async function getComingSoonIndia() {
   ]);
   const combined: any[] = [];
   const ids = new Set<number>();
-  for (const item of [...(movies.results || []), ...(shows.results || [])]) {
+  for (const item of [...(indianMovies.results || []), ...(indianShows.results || []), ...(globalMovies.results || []), ...(globalShows.results || [])]) {
     if (!ids.has(item.id)) { combined.push(item); ids.add(item.id); }
   }
   combined.sort((a: any, b: any) => {
