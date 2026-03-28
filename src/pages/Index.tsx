@@ -178,7 +178,7 @@ export default function HomePage() {
               </button>
             ))}
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 [&>*]:max-w-full">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {loading
               ? Array.from({ length: 10 }).map((_, i) => <ContentCardSkeleton key={i} />)
               : ottItems.slice(0, 10).map((item: any, i: number) => (
