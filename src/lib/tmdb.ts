@@ -123,17 +123,13 @@ export async function getIndianOTTShows() {
 export async function getComingSoonIndia() {
   const today = new Date().toISOString().split('T')[0];
   const threeMonths = new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0];
-  const [ottMovies, globalOttMovies, shows] = await Promise.all([
-    // Indian language movies with digital release type (OTT)
-    tmdbFetch(`/discover/movie?with_release_type=4&release_date.gte=${today}&release_date.lte=${threeMonths}&sort_by=popularity.desc&with_original_language=hi|ta|te|ml|kn`),
-    // Popular English movies coming to digital/OTT
-    tmdbFetch(`/discover/movie?with_release_type=4&release_date.gte=${today}&release_date.lte=${threeMonths}&sort_by=popularity.desc&vote_count.gte=10`),
-    // Upcoming TV shows (most new shows are OTT in India)
-    tmdbFetch(`/discover/tv?sort_by=popularity.desc&first_air_date.gte=${today}&first_air_date.lte=${threeMonths}&with_original_language=hi|ta|te|ml|kn|en&without_genres=10766,10767,10764&vote_count.gte=0`),
+  const [movies, shows] = await Promise.all([
+    tmdbFetch(`/discover/movie?region=IN&watch_region=IN&with_watch_monetization_types=flatrate&sort_by=popularity.desc&primary_release_date.gte=${today}&primary_release_date.lte=${threeMonths}&with_original_language=hi|ta|te|ml|kn|en`),
+    tmdbFetch(`/discover/tv?watch_region=IN&with_watch_monetization_types=flatrate&sort_by=popularity.desc&first_air_date.gte=${today}&first_air_date.lte=${threeMonths}&with_original_language=hi|ta|te|ml|kn|en`),
   ]);
   const combined: any[] = [];
   const ids = new Set<number>();
-  for (const item of [...(ottMovies.results || []), ...(globalOttMovies.results || []), ...(shows.results || [])]) {
+  for (const item of [...(movies.results || []), ...(shows.results || [])]) {
     if (!ids.has(item.id)) { combined.push(item); ids.add(item.id); }
   }
   combined.sort((a: any, b: any) => {
