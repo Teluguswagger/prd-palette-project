@@ -122,7 +122,6 @@ export async function getIndianOTTShows() {
     return !dominated.includes(10766) && !dominated.includes(10767) && !dominated.includes(10764);
   });
 }
-}
 
 export async function getComingSoonIndia() {
   const today = new Date().toISOString().split('T')[0];
