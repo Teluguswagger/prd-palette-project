@@ -122,10 +122,12 @@ export async function getIndianOTTShows() {
 
 export async function getComingSoonIndia() {
   const today = new Date().toISOString().split('T')[0];
-  const threeMonths = new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0];
-  const [movies, shows] = await Promise.all([
-    tmdbFetch(`/discover/movie?region=IN&watch_region=IN&with_watch_monetization_types=flatrate&sort_by=popularity.desc&primary_release_date.gte=${today}&primary_release_date.lte=${threeMonths}&with_original_language=hi|ta|te|ml|kn|en`),
-    tmdbFetch(`/discover/tv?watch_region=IN&with_watch_monetization_types=flatrate&sort_by=popularity.desc&first_air_date.gte=${today}&first_air_date.lte=${threeMonths}&with_original_language=hi|ta|te|ml|kn|en`),
+  const sixMonths = new Date(Date.now() + 180 * 86400000).toISOString().split('T')[0];
+  const [indianMovies, indianShows, globalMovies, globalShows] = await Promise.all([
+    tmdbFetch(`/discover/movie?sort_by=popularity.desc&primary_release_date.gte=${today}&primary_release_date.lte=${sixMonths}&with_original_language=hi|ta|te|ml|kn`),
+    tmdbFetch(`/discover/tv?sort_by=popularity.desc&first_air_date.gte=${today}&first_air_date.lte=${sixMonths}&with_original_language=hi|ta|te|ml|kn`),
+    tmdbFetch(`/movie/upcoming?region=IN`),
+    tmdbFetch(`/discover/tv?sort_by=popularity.desc&first_air_date.gte=${today}&first_air_date.lte=${sixMonths}&with_original_language=en&vote_count.gte=5`),
   ]);
   const combined: any[] = [];
   const ids = new Set<number>();
