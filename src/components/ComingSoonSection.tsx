@@ -81,7 +81,7 @@ export default function ComingSoonSection({
                 <Link
                   key={item.id}
                   to={`/title/${item.id}?type=${type}`}
-                  className="min-w-[180px] max-w-[180px] group flex-shrink-0"
+                  className="w-[180px] min-w-[180px] max-w-[180px] group flex-shrink-0"
                 >
                   <div className="relative rounded-xl overflow-hidden bg-card border border-hub-border">
                     <div className="aspect-[2/3] relative">
