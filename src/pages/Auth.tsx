@@ -50,7 +50,7 @@ export default function Auth() {
               {isLogin ? "Welcome Back" : "Create Account"}
             </h1>
             <p className="text-sm text-muted-foreground">
-              {isLogin ? "Sign in to access your watchlist & reviews" : "Join EntertainHub to save and review content"}
+              {isLogin ? "Sign in to access your watchlist & reviews" : "Join CineWhisper to save and review content"}
             </p>
           </div>
 

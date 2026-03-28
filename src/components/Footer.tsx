@@ -22,8 +22,8 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <Link to="/" className="inline-block mb-4">
-              <span className="text-lg font-black text-primary">Entertain</span>
-              <span className="text-lg font-black text-foreground">Hub</span>
+              <span className="text-lg font-black text-primary">Cine</span>
+              <span className="text-lg font-black text-foreground">Whisper</span>
             </Link>
             <p className="text-sm text-secondary-foreground leading-relaxed">
               Your ultimate destination for discovering movies, OTT shows, anime, and manga. Read reviews, track watchlists, and stay updated.
@@ -55,7 +55,7 @@ export function Footer() {
           </div>
         </div>
         <div className="border-t border-hub-border mt-8 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-muted-foreground">© 2026 EntertainHub. All rights reserved.</p>
+          <p className="text-xs text-muted-foreground"><p className="text-xs text-muted-foreground">© 2026 CineWhisper. All rights reserved.</p></p>
           <p className="text-xs text-muted-foreground">Built with ❤️ for entertainment fans</p>
         </div>
       </div>
