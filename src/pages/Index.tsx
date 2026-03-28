@@ -168,13 +168,13 @@ export default function HomePage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <span className="text-lg">🇮🇳</span>
-              <h2 className="text-lg font-bold text-foreground">Top 10 Movies & Shows on Indian OTT This Week</h2>
+              <h2 className="text-lg font-bold text-foreground">Top 10 Movies & Web Series on Indian OTT This Week</h2>
             </div>
           </div>
           <div className="flex gap-2 mb-4">
             {(['movies', 'shows'] as const).map((t) => (
               <button key={t} onClick={() => setOttTab(t)} className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${ottTab === t ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-accent'}`}>
-                {t === 'movies' ? 'Movies' : 'Shows'}
+                {t === 'movies' ? 'Movies' : 'Web Series'}
               </button>
             ))}
           </div>
@@ -190,7 +190,7 @@ export default function HomePage() {
                       id={item.id}
                       title={item.title || item.name}
                       posterUrl={getPosterUrl(item.poster_path)}
-                      type={ottTab === 'movies' ? 'Film' : 'TV Show'}
+                      type={ottTab === 'movies' ? 'Film' : 'Web Series'}
                       genre={GENRE_MAP[item.genre_ids?.[0]] || ''}
                       year={(item.release_date || item.first_air_date || '').slice(0, 4)}
                       score={item.vote_average}
