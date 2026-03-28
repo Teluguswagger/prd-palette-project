@@ -79,6 +79,34 @@ export async function getIndianShows() {
   return data.results || [];
 }
 
+export async function getInTheatersMovies() {
+  const [global, indian] = await Promise.all([
+    tmdbFetch('/movie/now_playing?region=US'),
+    tmdbFetch('/discover/movie?with_original_language=hi|ta|te|ml|kn&region=IN&with_release_type=3|2'),
+  ]);
+  const combined = [...(global.results || [])];
+  const ids = new Set(combined.map((m: any) => m.id));
+  for (const m of (indian.results || [])) {
+    if (!ids.has(m.id)) { combined.push(m); ids.add(m.id); }
+  }
+  combined.sort((a: any, b: any) => (b.popularity || 0) - (a.popularity || 0));
+  return combined;
+}
+
+export async function getOnTVShows() {
+  const [global, indian] = await Promise.all([
+    tmdbFetch('/tv/on_the_air'),
+    tmdbFetch('/discover/tv?with_original_language=hi&sort_by=vote_average.desc&vote_count.gte=50&with_genres=18,80,10759,10765,9648&without_genres=10766,10767,10764'),
+  ]);
+  const combined = [...(global.results || [])];
+  const ids = new Set(combined.map((s: any) => s.id));
+  for (const s of (indian.results || [])) {
+    if (!ids.has(s.id)) { combined.push(s); ids.add(s.id); }
+  }
+  combined.sort((a: any, b: any) => (b.popularity || 0) - (a.popularity || 0));
+  return combined;
+}
+
 export async function getIndianOTTMovies() {
   const data = await tmdbFetch('/discover/movie?with_original_language=hi|ta|te|ml|kn&sort_by=popularity.desc&region=IN&watch_region=IN&with_watch_monetization_types=flatrate');
   return data.results || [];

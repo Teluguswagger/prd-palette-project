@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { TrendingUp, Star, Flame, ChevronRight } from "lucide-react";
 import { ContentCard, ContentCardSkeleton } from "@/components/ContentCard";
 import {
-  getTrendingMovies, getTrendingShows, getUpcomingMovies, getNowPlayingMovies,
+  getTrendingMovies, getTrendingShows, getInTheatersMovies, getOnTVShows,
   getIndianOTTMovies, getIndianOTTShows,
   getPosterUrl, getBackdropUrl, GENRE_MAP,
 } from "@/lib/tmdb";
@@ -117,29 +117,29 @@ function SectionHeader({ title, href }: { title: string; href?: string }) {
 export default function HomePage() {
   const [trendingMovies, setTrendingMovies] = useState<any[]>([]);
   const [trendingShows, setTrendingShows] = useState<any[]>([]);
-  const [upcoming, setUpcoming] = useState<any[]>([]);
-  const [nowPlaying, setNowPlaying] = useState<any[]>([]);
+  const [inTheaters, setInTheaters] = useState<any[]>([]);
+  const [onTV, setOnTV] = useState<any[]>([]);
   const [topAnime, setTopAnime] = useState<any[]>([]);
   const [indianOTTMovies, setIndianOTTMovies] = useState<any[]>([]);
   const [indianOTTShows, setIndianOTTShows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<'streaming' | 'upcoming'>('streaming');
+  const [tab, setTab] = useState<'theaters' | 'ontv'>('theaters');
   const [ottTab, setOttTab] = useState<'movies' | 'shows'>('movies');
 
   useEffect(() => {
     Promise.all([
       getTrendingMovies(),
       getTrendingShows(),
-      getUpcomingMovies(),
-      getNowPlayingMovies(),
+      getInTheatersMovies(),
+      getOnTVShows(),
       getTopAnime().catch(() => []),
       getIndianOTTMovies().catch(() => []),
       getIndianOTTShows().catch(() => []),
-    ]).then(([movies, shows, up, np, anime, ottMovies, ottShows]) => {
+    ]).then(([movies, shows, theaters, tv, anime, ottMovies, ottShows]) => {
       setTrendingMovies(movies);
       setTrendingShows(shows);
-      setUpcoming(up);
-      setNowPlaying(np);
+      setInTheaters(theaters);
+      setOnTV(tv);
       setTopAnime(anime);
       setIndianOTTMovies(ottMovies);
       setIndianOTTShows(ottShows);
@@ -147,7 +147,7 @@ export default function HomePage() {
     }).catch(() => setLoading(false));
   }, []);
 
-  const displayItems = tab === 'streaming' ? nowPlaying : upcoming;
+  const displayItems = tab === 'theaters' ? inTheaters : onTV;
   const ottItems = ottTab === 'movies' ? indianOTTMovies : indianOTTShows;
 
   return (
@@ -202,13 +202,13 @@ export default function HomePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-10">
-            {/* Best Things to Watch */}
+            {/* In Theaters / On TV */}
             <section>
               <SectionHeader title="Best Things to Watch" href="/movies" />
               <div className="flex gap-2 mb-4">
-                {(['streaming', 'upcoming'] as const).map((t) => (
+                {(['theaters', 'ontv'] as const).map((t) => (
                   <button key={t} onClick={() => setTab(t)} className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${tab === t ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-accent'}`}>
-                    {t === 'streaming' ? 'Streaming Now' : 'Coming Soon'}
+                    {t === 'theaters' ? 'In Theaters' : 'On TV'}
                   </button>
                 ))}
               </div>
@@ -216,7 +216,7 @@ export default function HomePage() {
                 {loading
                   ? Array.from({ length: 6 }).map((_, i) => <ContentCardSkeleton key={i} />)
                   : displayItems.slice(0, 6).map((item: any) => (
-                      <ContentCard key={item.id} id={item.id} title={item.title || item.name} posterUrl={getPosterUrl(item.poster_path)} type="Film" genre={GENRE_MAP[item.genre_ids?.[0]] || ''} year={(item.release_date || '').slice(0, 4)} score={item.vote_average} href={`/title/${item.id}?type=movie`} />
+                      <ContentCard key={item.id} id={item.id} title={item.title || item.name} posterUrl={getPosterUrl(item.poster_path)} type={tab === 'theaters' ? 'Film' : 'TV Show'} genre={GENRE_MAP[item.genre_ids?.[0]] || ''} year={(item.release_date || item.first_air_date || '').slice(0, 4)} score={item.vote_average} href={`/title/${item.id}?type=${tab === 'theaters' ? 'movie' : 'show'}`} />
                     ))}
               </div>
             </section>
@@ -237,7 +237,7 @@ export default function HomePage() {
           {/* Sidebar */}
           <div className="space-y-6">
             <SidebarTop10 title="Top 10 This Week" items={trendingMovies} icon={<TrendingUp className="w-4 h-4 text-primary" />} />
-            <SidebarTop10 title="Most Anticipated" items={upcoming} icon={<Star className="w-4 h-4 text-yellow-500" />} />
+            <SidebarTop10 title="Most Anticipated" items={inTheaters} icon={<Star className="w-4 h-4 text-yellow-500" />} />
           </div>
         </div>
       </div>
