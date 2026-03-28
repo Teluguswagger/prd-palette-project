@@ -116,10 +116,28 @@ export async function getIndianOTTMovies() {
 }
 
 export async function getIndianOTTShows() {
-  const data = await tmdbFetch('/discover/tv?with_original_language=hi|ta|te|ml|kn&sort_by=popularity.desc&region=IN&watch_region=IN&with_watch_monetization_types=flatrate&without_genres=10766,10767,10764,10762,10763&vote_average.gte=5&with_type=2|4');
-  return (data.results || []).filter((item: any) => {
+  // Fetch popular Indian OTT shows, excluding soaps/reality/talk/news/kids
+  const data = await tmdbFetch('/discover/tv?with_original_language=hi|ta|te|ml|kn&sort_by=popularity.desc&region=IN&watch_region=IN&with_watch_monetization_types=flatrate&without_genres=10766,10767,10764,10762,10763&vote_average.gte=6&with_type=4');
+  const results = data.results || [];
+  
+  // Fetch details for each show to filter out daily serials (high episode counts)
+  const detailedResults = await Promise.all(
+    results.slice(0, 20).map(async (item: any) => {
+      try {
+        const details = await tmdbFetch(`/tv/${item.id}`);
+        return { ...item, _episodes: details.number_of_episodes || 0, _seasons: details.number_of_seasons || 0 };
+      } catch {
+        return { ...item, _episodes: 0, _seasons: 1 };
+      }
+    })
+  );
+  
+  return detailedResults.filter((item: any) => {
     const dominated = (item.genre_ids || []);
-    return !dominated.includes(10766) && !dominated.includes(10767) && !dominated.includes(10764);
+    const isSoapGenre = dominated.includes(10766) || dominated.includes(10767) || dominated.includes(10764);
+    // Daily serials typically have 100+ episodes; quality series have fewer
+    const isDailySerial = item._episodes > 80;
+    return !isSoapGenre && !isDailySerial;
   });
 }
 
