@@ -228,17 +228,6 @@ export default function HomePage() {
               </div>
             </section>
 
-            {/* Top Anime */}
-            {topAnime.length > 0 && (
-              <section>
-                <SectionHeader title="Top Anime" href="/anime" />
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {topAnime.slice(0, 6).map((item: any) => (
-                    <ContentCard key={item.mal_id} id={item.mal_id} title={item.title} posterUrl={item.images?.jpg?.image_url || null} type="Anime" genre={item.genres?.[0]?.name || ''} year={item.year?.toString()} score={item.score} href={`/title/${item.mal_id}?type=anime`} />
-                  ))}
-                </div>
-              </section>
-            )}
           </div>
 
           {/* Sidebar */}
