@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, X } from "lucide-react";
 import { searchContent, getPosterUrl } from "@/lib/tmdb";
+import { searchManga } from "@/lib/jikan";
 import { cn } from "@/lib/utils";
 
 export function SearchBar({ className }: { className?: string }) {
@@ -27,8 +28,27 @@ export function SearchBar({ className }: { className?: string }) {
     timerRef.current = setTimeout(async () => {
       setLoading(true);
       try {
-        const data = await searchContent(query);
-        setResults(data.slice(0, 8));
+        const [tmdbData, mangaData] = await Promise.all([
+          searchContent(query).catch(() => []),
+          searchManga(query).catch(() => []),
+        ]);
+
+        const tmdbResults = tmdbData.slice(0, 6).map((item: any) => ({
+          ...item,
+          _source: 'tmdb' as const,
+        }));
+
+        const mangaResults = mangaData.slice(0, 4).map((item: any) => ({
+          id: item.mal_id,
+          title: item.title,
+          poster_path: null,
+          _posterUrl: item.images?.jpg?.small_image_url || null,
+          media_type: (item.type || 'Manga').toLowerCase(),
+          release_date: item.published?.from?.slice(0, 4) || '',
+          _source: 'jikan' as const,
+        }));
+
+        setResults([...tmdbResults, ...mangaResults]);
         setIsOpen(true);
       } catch { setResults([]); }
       setLoading(false);
@@ -37,8 +57,12 @@ export function SearchBar({ className }: { className?: string }) {
   }, [query]);
 
   const handleSelect = (item: any) => {
-    const type = item.media_type === 'tv' ? 'show' : item.media_type;
-    navigate(`/title/${item.id}?type=${type}`);
+    if (item._source === 'jikan') {
+      navigate(`/title/${item.id}?type=manga`);
+    } else {
+      const type = item.media_type === 'tv' ? 'show' : item.media_type;
+      navigate(`/title/${item.id}?type=${type}`);
+    }
     setIsOpen(false);
     setQuery("");
   };
@@ -52,7 +76,7 @@ export function SearchBar({ className }: { className?: string }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Escape" && setIsOpen(false)}
-          placeholder="Search movies, shows, anime..."
+          placeholder="Search movies, shows, anime, manga..."
           className="bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none w-full"
         />
         {query && (
@@ -68,20 +92,24 @@ export function SearchBar({ className }: { className?: string }) {
           ) : results.length === 0 ? (
             <div className="p-4 text-sm text-muted-foreground text-center">No results found</div>
           ) : (
-            results.map((item) => (
+            results.map((item, idx) => (
               <button
-                key={item.id}
+                key={`${item._source}-${item.id}-${idx}`}
                 onClick={() => handleSelect(item)}
                 className="w-full flex items-center gap-3 p-3 hover:bg-accent transition-colors text-left"
               >
-                {item.poster_path ? (
+                {(item._source === 'jikan' && item._posterUrl) ? (
+                  <img src={item._posterUrl} alt="" className="w-10 h-14 rounded object-cover" />
+                ) : item.poster_path ? (
                   <img src={getPosterUrl(item.poster_path, 'w92')!} alt="" className="w-10 h-14 rounded object-cover" />
                 ) : (
                   <div className="w-10 h-14 rounded bg-muted flex items-center justify-center text-xs text-muted-foreground">N/A</div>
                 )}
                 <div>
                   <p className="text-sm font-medium text-foreground">{item.title || item.name}</p>
-                  <p className="text-xs text-secondary-foreground capitalize">{item.media_type} · {(item.release_date || item.first_air_date || '').slice(0, 4)}</p>
+                  <p className="text-xs text-secondary-foreground capitalize">
+                    {item.media_type} · {(item.release_date || item.first_air_date || '').slice(0, 4)}
+                  </p>
                 </div>
               </button>
             ))
