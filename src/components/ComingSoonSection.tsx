@@ -42,7 +42,7 @@ export default function ComingSoonSection({
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Calendar className="w-5 h-5 text-primary" />
-          <h2 className="text-lg font-bold text-foreground">Coming Soon on OTT</h2>
+          <h2 className="text-lg font-bold text-foreground">Coming Soon</h2>
         </div>
         <div className="flex gap-1">
           <button
@@ -72,7 +72,7 @@ export default function ComingSoonSection({
                 <ContentCardSkeleton />
               </div>
             ))
-          : items.slice(0, 20).map((item) => {
+          : items.filter(item => item.poster_path).slice(0, 20).map((item) => {
               const isMovie = !!item.title;
               const type = isMovie ? "movie" : "show";
               const streamDate = item.release_date || item.first_air_date;
