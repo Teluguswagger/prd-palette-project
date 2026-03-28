@@ -190,7 +190,7 @@ export default function HomePage() {
                       id={item.id}
                       title={item.title || item.name}
                       posterUrl={getPosterUrl(item.poster_path)}
-                      type={ottTab === 'movies' ? 'Film' : 'TV Show'}
+                      type={ottTab === 'movies' ? 'Film' : 'Web Series'}
                       genre={GENRE_MAP[item.genre_ids?.[0]] || ''}
                       year={(item.release_date || item.first_air_date || '').slice(0, 4)}
                       score={item.vote_average}
