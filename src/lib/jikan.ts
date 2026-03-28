@@ -19,6 +19,26 @@ export async function getTopManga() {
   return jikanFetch('/top/manga?limit=20');
 }
 
+export async function getPopularManga() {
+  return jikanFetch('/manga?order_by=popularity&sort=asc&type=manga&limit=20');
+}
+
+export async function getPopularManhwa() {
+  return jikanFetch('/manga?order_by=popularity&sort=asc&type=manhwa&limit=20');
+}
+
+export async function getPopularManhua() {
+  return jikanFetch('/manga?order_by=popularity&sort=asc&type=manhua&limit=20');
+}
+
+export async function getPopularLightNovels() {
+  return jikanFetch('/manga?order_by=popularity&sort=asc&type=lightnovel&limit=20');
+}
+
+export async function getRecentManga() {
+  return jikanFetch('/manga?order_by=start_date&sort=desc&status=publishing&limit=20');
+}
+
 export async function getAnimeDetails(id: string) {
   const res = await fetch(`${JIKAN_BASE}/anime/${id}/full`);
   const data = await res.json();
