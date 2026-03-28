@@ -117,29 +117,29 @@ function SectionHeader({ title, href }: { title: string; href?: string }) {
 export default function HomePage() {
   const [trendingMovies, setTrendingMovies] = useState<any[]>([]);
   const [trendingShows, setTrendingShows] = useState<any[]>([]);
-  const [upcoming, setUpcoming] = useState<any[]>([]);
-  const [nowPlaying, setNowPlaying] = useState<any[]>([]);
+  const [inTheaters, setInTheaters] = useState<any[]>([]);
+  const [onTV, setOnTV] = useState<any[]>([]);
   const [topAnime, setTopAnime] = useState<any[]>([]);
   const [indianOTTMovies, setIndianOTTMovies] = useState<any[]>([]);
   const [indianOTTShows, setIndianOTTShows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<'streaming' | 'upcoming'>('streaming');
+  const [tab, setTab] = useState<'theaters' | 'ontv'>('theaters');
   const [ottTab, setOttTab] = useState<'movies' | 'shows'>('movies');
 
   useEffect(() => {
     Promise.all([
       getTrendingMovies(),
       getTrendingShows(),
-      getUpcomingMovies(),
-      getNowPlayingMovies(),
+      getInTheatersMovies(),
+      getOnTVShows(),
       getTopAnime().catch(() => []),
       getIndianOTTMovies().catch(() => []),
       getIndianOTTShows().catch(() => []),
-    ]).then(([movies, shows, up, np, anime, ottMovies, ottShows]) => {
+    ]).then(([movies, shows, theaters, tv, anime, ottMovies, ottShows]) => {
       setTrendingMovies(movies);
       setTrendingShows(shows);
-      setUpcoming(up);
-      setNowPlaying(np);
+      setInTheaters(theaters);
+      setOnTV(tv);
       setTopAnime(anime);
       setIndianOTTMovies(ottMovies);
       setIndianOTTShows(ottShows);
@@ -147,7 +147,7 @@ export default function HomePage() {
     }).catch(() => setLoading(false));
   }, []);
 
-  const displayItems = tab === 'streaming' ? nowPlaying : upcoming;
+  const displayItems = tab === 'theaters' ? inTheaters : onTV;
   const ottItems = ottTab === 'movies' ? indianOTTMovies : indianOTTShows;
 
   return (
