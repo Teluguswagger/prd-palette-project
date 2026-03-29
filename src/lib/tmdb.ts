@@ -117,7 +117,19 @@ export async function getIndianOTTMovies() {
 
 export async function getIndianOTTShows() {
   const data = await tmdbFetch('/discover/tv?with_original_language=hi|ta|te|ml|kn&sort_by=popularity.desc&region=IN&watch_region=IN&with_watch_monetization_types=flatrate&with_genres=18|80|10759|10765|9648&without_genres=10766,10767,10764,10763,10762&vote_count.gte=10');
-  return data.results || [];
+  const results = data.results || [];
+  // Fetch details for each show to filter by episode count (<150)
+  const detailed = await Promise.all(
+    results.map(async (show: any) => {
+      try {
+        const details = await tmdbFetch(`/tv/${show.id}`);
+        return { ...show, number_of_episodes: details.number_of_episodes || 0 };
+      } catch {
+        return { ...show, number_of_episodes: 0 };
+      }
+    })
+  );
+  return detailed.filter((show: any) => show.number_of_episodes < 150);
 }
 
 export async function getComingSoonIndia() {
