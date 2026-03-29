@@ -111,11 +111,18 @@ export async function getOnTVContent() {
 }
 
 export async function getIndianOTTMovies() {
-  const data = await tmdbFetch('/trending/movie/week?language=en-US');
-  const results = data.results || [];
-  // Filter to Indian language movies only
+  const [trending, discover] = await Promise.all([
+    tmdbFetch('/trending/movie/week?language=en-US'),
+    tmdbFetch('/discover/movie?with_original_language=hi|ta|te|ml|kn&sort_by=popularity.desc&region=IN&watch_region=IN&with_watch_monetization_types=flatrate'),
+  ]);
   const indianLangs = ['hi', 'ta', 'te', 'ml', 'kn', 'pa', 'bn', 'mr', 'gu'];
-  return results.filter((m: any) => indianLangs.includes(m.original_language));
+  const trendingIndian = (trending.results || []).filter((m: any) => indianLangs.includes(m.original_language));
+  const combined = [...trendingIndian];
+  const ids = new Set(combined.map((m: any) => m.id));
+  for (const m of (discover.results || [])) {
+    if (!ids.has(m.id)) { combined.push(m); ids.add(m.id); }
+  }
+  return combined;
 }
 
 export async function getIndianOTTShows() {
