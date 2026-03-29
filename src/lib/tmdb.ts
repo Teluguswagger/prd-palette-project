@@ -111,8 +111,11 @@ export async function getOnTVContent() {
 }
 
 export async function getIndianOTTMovies() {
-  const data = await tmdbFetch('/discover/movie?with_original_language=hi|ta|te|ml|kn&sort_by=popularity.desc&region=IN&watch_region=IN&with_watch_monetization_types=flatrate');
-  return data.results || [];
+  const data = await tmdbFetch('/trending/movie/week?language=en-US');
+  const results = data.results || [];
+  // Filter to Indian language movies only
+  const indianLangs = ['hi', 'ta', 'te', 'ml', 'kn', 'pa', 'bn', 'mr', 'gu'];
+  return results.filter((m: any) => indianLangs.includes(m.original_language));
 }
 
 export async function getIndianOTTShows() {
