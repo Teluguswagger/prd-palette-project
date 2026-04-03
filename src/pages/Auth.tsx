@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
@@ -44,7 +45,14 @@ export default function Auth() {
   return (
     <div className="pt-16 min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <div className="bg-card border border-hub-border rounded-2xl p-8">
+         <div className="bg-card border border-hub-border rounded-2xl p-8 relative">
+          <button
+            onClick={() => navigate(-1)}
+            className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold text-foreground mb-1">
               {isLogin ? "Welcome Back" : "Create Account"}
